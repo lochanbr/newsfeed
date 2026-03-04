@@ -21,10 +21,10 @@ export async function fetchNews(country: string, category: string): Promise<News
 
   // Map API response to NewsArticle[]
   return (data.results || []).map((item: any) => ({
-    title: item.title,
-    description: item.description,
-    url: item.link,
-    image: item.image_url || '/placeholder.jpg',
-    source: item.source_id || 'Unknown',
+    title: item.title || 'No Title',
+    description: item.description || 'No description available.',
+    url: item.link || '#',
+    image: item.image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+    source: item.source_id || 'Unknown Source',
   }));
 }

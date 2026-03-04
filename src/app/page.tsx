@@ -18,14 +18,16 @@ const ISO_COUNTRIES = [
 ];
 
 const CATEGORIES = [
+  { key: "top", label: "Top" },
   { key: "world", label: "World" },
-  { key: "india", label: "India" },
   { key: "technology", label: "Technology" },
+  { key: "business", label: "Business" },
+  { key: "science", label: "Science" },
 ];
 
 export default function Home() {
   const [country, setCountry] = useState("us");
-  const [category, setCategory] = useState("world");
+  const [category, setCategory] = useState("top");
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<{ article: NewsArticle; summary: { bullets: string[]; paragraph: string } } | null>(null);
@@ -36,14 +38,21 @@ export default function Home() {
     setLoading(true);
     fetchNews(country, category)
       .then(setNews)
+      .catch(err => {
+        console.error("Failed to fetch news:", err);
+        setNews([]);
+      })
       .finally(() => setLoading(false));
   }, [country, category]);
 
   const handleSimplify = async (article: NewsArticle) => {
     setSimplifying(true);
     try {
-      const summary = await simplifyNews(article.description);
+      const summary = await simplifyNews(article.description || article.title);
       setModal({ article, summary });
+    } catch (err) {
+      console.error("Simplification failed:", err);
+      alert("AI Simplification failed. Please try again.");
     } finally {
       setSimplifying(false);
     }
@@ -76,11 +85,11 @@ export default function Home() {
           />
         </div>
         {/* Category Tabs */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto max-w-full pb-2 md:pb-0">
           {CATEGORIES.map(cat => (
             <button
               key={cat.key}
-              className={`px-4 py-2 rounded-full font-medium transition-colors ${category === cat.key ? "bg-blue-600 text-white dark:bg-blue-400 dark:text-black" : "bg-zinc-200 dark:bg-zinc-700 text-black dark:text-zinc-50"}`}
+              className={`px-4 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${category === cat.key ? "bg-blue-600 text-white dark:bg-blue-400 dark:text-black" : "bg-zinc-200 dark:bg-zinc-700 text-black dark:text-zinc-50"}`}
               onClick={() => setCategory(cat.key)}
             >
               {cat.label}
@@ -93,27 +102,33 @@ export default function Home() {
         {loading ? (
           <div className="col-span-full text-center py-16">Loading news...</div>
         ) : news.length === 0 ? (
-          <div className="col-span-full text-center py-16">No news found.</div>
+          <div className="col-span-full text-center py-16">No news found for this selection.</div>
         ) : (
           news.map(article => (
             <div key={article.url} className="bg-white dark:bg-zinc-900 rounded-xl shadow-md overflow-hidden flex flex-col">
-              <Image
-                src={article.image}
-                alt={article.title}
-                width={400}
-                height={200}
-                className="object-cover w-full h-48"
-              />
+              <div className="relative w-full h-48 bg-zinc-200 dark:bg-zinc-800">
+                <Image
+                  src={article.image}
+                  alt={article.title}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  onError={(e) => {
+                    // Fallback if the image URL itself is broken
+                    (e.target as any).src = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop";
+                  }}
+                />
+              </div>
               <div className="flex-1 p-4 flex flex-col gap-2">
                 <h2 className="text-lg font-semibold line-clamp-2">{article.title}</h2>
                 <div className="text-xs text-zinc-500">{article.source}</div>
                 <button
-                  className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition"
+                  className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition disabled:opacity-50"
                   onClick={() => handleSimplify(article)}
                   disabled={simplifying}
                 >
                   <LucideSparkles className="w-4 h-4" />
-                  ✨ Simplify
+                  {simplifying ? "Simplifying..." : "✨ Simplify"}
                 </button>
               </div>
             </div>
@@ -138,18 +153,28 @@ export default function Home() {
               onClick={e => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold mb-4">Simplified News</h3>
-              <ul className="mb-4 list-disc pl-6">
+              <ul className="mb-4 list-disc pl-6 space-y-2">
                 {modal.summary.bullets.map((b, i) => (
-                  <li key={i}>{b}</li>
+                  <li key={i}>{b.replace(/•\s*/, "")}</li>
                 ))}
               </ul>
-              <p className="mb-4 text-zinc-700 dark:text-zinc-300">{modal.summary.paragraph}</p>
-              <button
-                className="w-full py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                onClick={() => setModal(null)}
-              >
-                Close
-              </button>
+              <p className="mb-4 text-zinc-700 dark:text-zinc-300 leading-relaxed">{modal.summary.paragraph}</p>
+              <div className="flex gap-3">
+                <a
+                  href={modal.article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 text-center py-2 rounded-full border border-zinc-300 dark:border-zinc-700 font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                >
+                  Read Original
+                </a>
+                <button
+                  className="flex-1 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                  onClick={() => setModal(null)}
+                >
+                  Close
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
