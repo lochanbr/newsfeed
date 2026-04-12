@@ -59,14 +59,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-zinc-50 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-white to-zinc-50 dark:from-slate-950 dark:to-slate-900 text-black dark:text-zinc-50 font-sans">
       {/* Filter Bar */}
-      <div className="sticky top-0 z-10 flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white/80 dark:bg-black/80 backdrop-blur shadow-sm">
-        <div className="flex items-center gap-2">
-          <LucideGlobe className="w-5 h-5" />
-          <motion.div layout>
+      <div className="sticky top-0 z-10 flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-md border-b border-zinc-200 dark:border-slate-800">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <LucideGlobe className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          <motion.div layout className="flex gap-2 flex-1 md:flex-initial">
             <select
-              className="rounded px-2 py-1 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:outline-none"
+              className="rounded-lg px-3 py-2 bg-zinc-100 dark:bg-slate-800 border border-zinc-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium"
               value={country}
               onChange={e => setCountry(e.target.value)}
             >
@@ -75,63 +75,87 @@ export default function Home() {
               ))}
             </select>
           </motion.div>
-          <LucideSearch className="w-4 h-4 ml-2" />
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <LucideSearch className="w-4 h-4 text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
           <input
             type="text"
             placeholder="Search country..."
-            className="rounded px-2 py-1 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 focus:outline-none"
+            className="rounded-lg px-3 py-2 bg-zinc-100 dark:bg-slate-800 border border-zinc-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm w-full md:w-40"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
         {/* Category Tabs */}
-        <div className="flex gap-2 overflow-x-auto max-w-full pb-2 md:pb-0">
+        <motion.div layout className="flex gap-2 overflow-x-auto max-w-full pb-2 md:pb-0 w-full md:w-auto">
           {CATEGORIES.map(cat => (
-            <button
+            <motion.button
               key={cat.key}
-              className={`px-4 py-2 rounded-full font-medium transition-colors whitespace-nowrap ${category === cat.key ? "bg-blue-600 text-white dark:bg-blue-400 dark:text-black" : "bg-zinc-200 dark:bg-zinc-700 text-black dark:text-zinc-50"}`}
+              layout
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all whitespace-nowrap ${
+                category === cat.key
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/50 dark:bg-blue-500 dark:shadow-blue-500/50"
+                  : "bg-zinc-200 dark:bg-slate-800 text-black dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-slate-700"
+              }`}
               onClick={() => setCategory(cat.key)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {cat.label}
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       </div>
       {/* News Feed */}
-      <main className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <main className="p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {loading ? (
-          <div className="col-span-full text-center py-16">Loading news...</div>
+          <div className="col-span-full flex items-center justify-center py-24">
+            <div className="flex flex-col items-center gap-4">
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2 }} className="w-8 h-8 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full" />
+              <p className="text-zinc-600 dark:text-zinc-400">Loading latest news...</p>
+            </div>
+          </div>
         ) : news.length === 0 ? (
-          <div className="col-span-full text-center py-16">No news found for this selection.</div>
+          <div className="col-span-full flex items-center justify-center py-24">
+            <p className="text-lg text-zinc-500 dark:text-zinc-400">No news found for this selection.</p>
+          </div>
         ) : (
-          news.map(article => (
-            <div key={article.url} className="bg-white dark:bg-zinc-900 rounded-xl shadow-md overflow-hidden flex flex-col">
-              <div className="relative w-full h-48 bg-zinc-200 dark:bg-zinc-800">
+          news.map((article, index) => (
+            <motion.div
+              key={article.url}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="group bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-xl overflow-hidden flex flex-col transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 border border-transparent"
+            >
+              <div className="relative w-full h-48 bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-slate-700 dark:to-slate-800 overflow-hidden">
                 <Image
                   src={article.image}
                   alt={article.title}
                   fill
                   unoptimized
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    // Fallback if the image URL itself is broken
                     (e.target as any).src = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop";
                   }}
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-              <div className="flex-1 p-4 flex flex-col gap-2">
-                <h2 className="text-lg font-semibold line-clamp-2">{article.title}</h2>
-                <div className="text-xs text-zinc-500">{article.source}</div>
-                <button
-                  className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition disabled:opacity-50"
+              <div className="flex-1 p-5 flex flex-col gap-3">
+                <h2 className="text-base font-semibold line-clamp-2 text-black dark:text-white leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{article.title}</h2>
+                <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{article.source}</div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="mt-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   onClick={() => handleSimplify(article)}
                   disabled={simplifying}
                 >
                   <LucideSparkles className="w-4 h-4" />
-                  {simplifying ? "Simplifying..." : "✨ Simplify"}
-                </button>
+                  {simplifying ? "Simplifying..." : "Simplify"}
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </main>
@@ -139,41 +163,67 @@ export default function Home() {
       <AnimatePresence>
         {modal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setModal(null)}
           >
             <motion.div
-              className="bg-white/80 dark:bg-zinc-900/80 rounded-2xl shadow-xl p-8 max-w-lg w-full glassmorphism border border-zinc-200 dark:border-zinc-700"
-              initial={{ scale: 0.9, y: 40 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 40 }}
+              className="bg-white/95 dark:bg-slate-800/95 rounded-2xl shadow-2xl p-8 max-w-2xl w-full backdrop-blur-xl border border-white/30 dark:border-slate-700/50"
+              initial={{ scale: 0.8, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.8, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 350 }}
               onClick={e => e.stopPropagation()}
             >
-              <h3 className="text-xl font-bold mb-4">Simplified News</h3>
-              <ul className="mb-4 list-disc pl-6 space-y-2">
-                {modal.summary.bullets.map((b, i) => (
-                  <li key={i}>{b.replace(/•\s*/, "")}</li>
-                ))}
-              </ul>
-              <p className="mb-4 text-zinc-700 dark:text-zinc-300 leading-relaxed">{modal.summary.paragraph}</p>
+              <motion.h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
+                ✨ Simplified News
+              </motion.h3>
+              
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-3">Key Points</h4>
+                <motion.ul className="space-y-2">
+                  {modal.summary.bullets.map((b, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex gap-3 text-sm"
+                    >
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold flex-shrink-0">•</span>
+                      <span className="text-black dark:text-zinc-100">{b.replace(/•\s*/, "")}</span>
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              </div>
+              
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-slate-700/50 rounded-lg border border-blue-200 dark:border-slate-600">
+                <p className="text-sm leading-relaxed text-black dark:text-zinc-100">
+                  {modal.summary.paragraph}
+                </p>
+              </div>
+              
               <div className="flex gap-3">
-                <a
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   href={modal.article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 text-center py-2 rounded-full border border-zinc-300 dark:border-zinc-700 font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                  className="flex-1 text-center py-3 rounded-lg border-2 border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-all"
                 >
                   Read Original
-                </a>
-                <button
-                  className="flex-1 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                </motion.a>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold transition-all shadow-lg hover:shadow-xl"
                   onClick={() => setModal(null)}
                 >
                   Close
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
